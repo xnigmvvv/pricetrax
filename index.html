@@ -1,256 +1,576 @@
-import { useState, useRef, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PriceTrax — Badger Breaks</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --black: #0f0f0f;
+      --gold: #cc0000;
+      --gold-light: #ff3333;
+      --cream: #f7f3ec;
+      --white: #ffffff;
+      --gray: #888;
+      --border: #d4cfc6;
+      --red: #c0392b;
+      --green: #27ae60;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--cream);
+      font-family: 'IBM Plex Sans', sans-serif;
+      color: var(--black);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--black);
+      padding: 0 32px;
+      display: flex;
+      align-items: stretch;
+      height: 64px;
+      border-bottom: 3px solid var(--gold);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-right: 1px solid #2a2a2a;
+      padding-right: 28px;
+      margin-right: 28px;
+    }
+
+    .header-logo .badger { font-size: 26px; line-height: 1; }
+
+    .header-logo .wordmark {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      color: var(--white);
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .header-logo .wordmark span {
+      color: var(--gold);
+    }
+
+    .header-sub {
+      display: flex;
+      align-items: center;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-print {
+      background: transparent;
+      border: 1px solid #333;
+      color: #666;
+      padding: 7px 16px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.15s;
+    }
+
+    .btn-print:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      min-height: calc(100vh - 67px);
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      background: var(--white);
+      border-right: 2px solid var(--black);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 15px;
+      background: var(--cream);
+      color: var(--black);
+      transition: border-color 0.15s;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--black);
+      background: var(--white);
+    }
+
+    .price-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-add {
+      width: 100%;
+      padding: 13px;
+      background: var(--gold);
+      border: 2px solid var(--black);
+      border-radius: 4px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: var(--black);
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--black);
+      transition: all 0.1s;
+    }
+
+    .btn-add:hover {
+      box-shadow: 1px 1px 0 var(--black);
+      transform: translate(2px, 2px);
+    }
+
+    .btn-add:active {
+      box-shadow: none;
+      transform: translate(3px, 3px);
+    }
+
+    /* Toast */
+    .toast {
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.2s;
+      min-height: 38px;
+    }
+    .toast.show { opacity: 1; }
+    .toast.ok { background: #eafaf1; color: var(--green); border: 1px solid #a9dfbf; }
+    .toast.err { background: #fdf0ee; color: var(--red); border: 1px solid #f1a9a0; }
+
+    /* Stats */
+    .stats {
+      border-top: 2px solid var(--cream);
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .stat-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 1px;
+      color: var(--black);
+    }
+
+    .stat-value.gold { color: var(--gold); }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      padding: 28px;
+      overflow-y: auto;
+    }
+
+    .right-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .right-header .count {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .btn-clear-all {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--gray);
+      padding: 5px 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.15s;
+    }
+
+    .btn-clear-all:hover { border-color: var(--red); color: var(--red); }
+
+    .labels-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      gap: 12px;
+      color: var(--border);
+    }
+
+    .empty-state .big { font-size: 48px; }
+    .empty-state p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ── LABEL CARD ── */
+    .label-card {
+      background: var(--white);
+      border: 1.5px solid var(--black);
+      border-radius: 3px;
+      width: 164px;
+      padding: 10px 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      box-shadow: 2px 2px 0 var(--black);
+      page-break-inside: avoid;
+    }
+
+    .label-card .lc-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--gray);
+      width: 100%;
+      text-align: center;
+      border-bottom: 1px solid var(--cream);
+      padding-bottom: 5px;
+    }
+
+    .label-card .lc-brand span { color: var(--gold); }
+
+    .label-card .lc-name {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.3;
+      word-break: break-word;
+      color: var(--black);
+      max-width: 144px;
+    }
+
+    .label-card .lc-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: var(--black);
+      border-top: 1px solid var(--cream);
+      padding-top: 5px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .label-card .lc-date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px;
+      color: var(--gray);
+      letter-spacing: 0.5px;
+    }
+
+    .btn-remove {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--border);
+      line-height: 1;
+      transition: color 0.15s;
+    }
+
+    .btn-remove:hover { color: var(--red); }
+
+    /* ── PRINT STYLES ── */
+    @media print {
+      .header, .left-panel, .right-header, .btn-remove, .toast { display: none !important; }
+      body { background: white; }
+      .layout { display: block; }
+      .right-panel { padding: 10px; }
+      .labels-grid { gap: 10px; }
+      .label-card { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header no-print">
+  <div class="header-logo">
+    <span style="display:inline-block;width:18px;height:18px;background:var(--gold);border-radius:2px;transform:rotate(45deg);flex-shrink:0;margin-right:4px;"></span><span class="wordmark">PRICE<span>TRAX</span></span>
+  </div>
+  <div class="header-sub">PriceTrax</div>
+  <div class="header-actions">
+    <button class="btn-print" onclick="window.print()">⎙ Print Labels</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: INPUT -->
+  <aside class="left-panel no-print">
+
+    <div>
+      <div class="section-label">New Card Entry</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="input-group">
+          <label>Card Name</label>
+          <input type="text" id="cardName" placeholder="e.g. 2021 Topps Chrome Trout" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('cardPrice').focus()">
+        </div>
+        <div class="price-row">
+          <div class="input-group">
+            <label>Purchase Price ($)</label>
+            <input type="number" id="cardPrice" placeholder="0.00" min="0" step="0.01" onkeydown="if(event.key==='Enter')addLabel()">
+          </div>
+          <div class="input-group">
+            <label>Qty</label>
+            <input type="number" id="cardQty" placeholder="1" min="1" step="1" value="1" onkeydown="if(event.key==='Enter')addLabel()">
+          </div>
+        </div>
+        <button class="btn-add" onclick="addLabel()">+ Add Label</button>
+        <div id="toast" class="toast"></div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="section-label">Session Summary</div>
+      <div class="stat-row">
+        <span class="stat-label">Cards Added</span>
+        <span class="stat-value" id="stat-count">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Total Spent</span>
+        <span class="stat-value gold" id="stat-total">$0.00</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- RIGHT: LABELS -->
+  <main class="right-panel">
+    <div class="right-header no-print">
+      <span class="count" id="label-count">No labels yet</span>
+      <button class="btn-clear-all" onclick="clearAll()">Clear All</button>
+    </div>
+
+    <div id="empty-state" class="empty-state">
+      <span class="big">🃏</span>
+      <p>Enter a card on the left to get started</p>
+    </div>
+
+    <div class="labels-grid" id="labels-grid"></div>
+  </main>
+
+</div>
+
+<script>
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxFwky0fg4MaekMMi53meyFNgQNQuEdAnFP-Na3diwWchir1OYF0CJkm0xMfzueogmNQw/exec";
 
-function useQRLib() {
-  const [ready, setReady] = useState(!!window.QRCode);
-  useEffect(() => {
-    if (window.QRCode) { setReady(true); return; }
-    const s = document.createElement("script");
-    s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
-    s.onload = () => setReady(true);
-    document.head.appendChild(s);
-  }, []);
-  return ready;
+let labels = [];
+let totalSpent = 0;
+
+function showToast(msg, type) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show " + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = "toast"; }, 3000);
 }
 
-function buildURL(name, price) {
-  const data = JSON.stringify({ n: name, p: price, t: new Date().toISOString().split("T")[0] });
-  return `${SHEET_URL}?data=${encodeURIComponent(data)}`;
-}
-
-function QRCanvas({ value, size = 118 }) {
-  const divRef = useRef();
-  const qrReady = useQRLib();
-
-  useEffect(() => {
-    if (!qrReady || !divRef.current) return;
-    divRef.current.innerHTML = "";
-    new window.QRCode(divRef.current, {
-      text: value,
-      width: size,
-      height: size,
-      colorDark: "#1a1a1a",
-      colorLight: "#ffffff",
-      correctLevel: window.QRCode.CorrectLevel.M,
-    });
-  }, [qrReady, value, size]);
-
-  return (
-    <div ref={divRef} style={{ width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      {!qrReady && <span style={{ fontSize: 10, color: "#aaa", fontFamily: "monospace" }}>loading…</span>}
-    </div>
-  );
-}
-
-function LabelCard({ name, price, onRemove }) {
-  const url = buildURL(name, price);
-  const displayPrice = parseFloat(price).toFixed(2);
-
-  return (
-    <div className="label-card" style={{
-      background: "#fff", border: "1.5px solid #1a1a1a", borderRadius: 4,
-      padding: "10px 10px 8px", display: "flex", flexDirection: "column",
-      alignItems: "center", gap: 5, width: 152,
-      fontFamily: "'Courier New', monospace", position: "relative",
-      boxShadow: "2px 2px 0 #1a1a1a", pageBreakInside: "avoid",
-    }}>
-      <button className="no-print" onClick={onRemove} style={{
-        position: "absolute", top: 3, right: 6, background: "none", border: "none",
-        cursor: "pointer", fontSize: 13, color: "#bbb", lineHeight: 1,
-      }}>✕</button>
-      <div style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, color: "#888" }}>
-        BADGER BREAKS
-      </div>
-      <QRCanvas value={url} size={118} />
-      <div style={{
-        fontSize: 10, fontWeight: 700, textAlign: "center", lineHeight: 1.3,
-        maxWidth: 132, wordBreak: "break-word", color: "#1a1a1a",
-      }}>{name}</div>
-      <div style={{
-        fontSize: 14, fontWeight: 900, color: "#1a1a1a",
-        borderTop: "1px solid #eee", paddingTop: 4, width: "100%", textAlign: "center",
-      }}>${displayPrice}</div>
-    </div>
-  );
-}
-
-export default function App() {
-  const [cardName, setCardName] = useState("");
-  const [price, setPrice] = useState("");
-  const [labels, setLabels] = useState([]);
-  const [tab, setTab] = useState("generate");
-  const [copied, setCopied] = useState(false);
-  const nameRef = useRef();
-
-  useEffect(() => { if (tab === "generate") nameRef.current?.focus(); }, [tab]);
-
-  const addLabel = () => {
-    if (!cardName.trim() || !price) return;
-    setLabels(prev => [...prev, { name: cardName.trim(), price, id: Date.now() }]);
-    setCardName("");
-    setPrice("");
-    nameRef.current?.focus();
-  };
-
-  const gasCode = `function doGet(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const raw = e.parameter.data;
-  if (!raw) return ContentService.createTextOutput("Missing data");
+async function logToSheet(name, price, date) {
+  const url = `${SHEET_URL}?n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${date}`;
   try {
-    const parsed = JSON.parse(raw);
-    sheet.appendRow([
-      parsed.t || new Date().toISOString().split("T")[0],
-      parsed.n || "",
-      parseFloat(parsed.p) || 0,
-      new Date().toLocaleString()
-    ]);
-    return ContentService.createTextOutput("OK: " + parsed.n);
+    await fetch(url, { method: "GET", mode: "no-cors" });
   } catch(err) {
-    return ContentService.createTextOutput("Error: " + err);
+    console.warn("Sheet log error:", err);
   }
-}`;
-
-  return (
-    <div style={{ minHeight: "100vh", background: "#f5f0e8", fontFamily: "'Georgia', serif" }}>
-      <style>{`
-        @media print {
-          .no-print { display: none !important; }
-          body { background: white !important; }
-          .label-area { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; }
-        }
-      `}</style>
-
-      <div className="no-print" style={{
-        background: "#1a1a1a", color: "#f5f0e8", padding: "16px 24px",
-        display: "flex", alignItems: "baseline", gap: 12, borderBottom: "3px solid #c8a84b",
-      }}>
-        <span style={{ fontSize: 20, fontWeight: 900 }}>🦡 BADGER BREAKS</span>
-        <span style={{ fontSize: 11, color: "#c8a84b", letterSpacing: 2, textTransform: "uppercase", fontFamily: "'Courier New', monospace" }}>
-          Card Cost Tracker
-        </span>
-      </div>
-
-      <div className="no-print" style={{ display: "flex", borderBottom: "2px solid #1a1a1a", background: "#fff" }}>
-        {[["generate", "🏷 Generate Labels"], ["setup", "⚙️ Sheet Setup"]].map(([key, label]) => (
-          <button key={key} onClick={() => setTab(key)} style={{
-            padding: "11px 22px", background: tab === key ? "#c8a84b" : "transparent",
-            border: "none", borderRight: "1px solid #e0d9cc",
-            fontFamily: "'Courier New', monospace", fontWeight: 700, fontSize: 12,
-            cursor: "pointer", color: tab === key ? "#1a1a1a" : "#666",
-          }}>{label}</button>
-        ))}
-      </div>
-
-      <div style={{ maxWidth: 920, margin: "0 auto", padding: 22 }}>
-        {tab === "generate" && (
-          <>
-            <div className="no-print" style={{
-              background: "#fff", border: "2px solid #1a1a1a", borderRadius: 6,
-              padding: 18, marginBottom: 24, boxShadow: "3px 3px 0 #1a1a1a",
-            }}>
-              <div style={{ fontSize: 12, fontFamily: "'Courier New', monospace", fontWeight: 700, marginBottom: 12, letterSpacing: 1, textTransform: "uppercase", color: "#555" }}>
-                Add Card Label
-              </div>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
-                <div style={{ flex: "1 1 240px" }}>
-                  <label style={{ display: "block", fontSize: 10, fontFamily: "'Courier New', monospace", marginBottom: 4, color: "#888", textTransform: "uppercase", letterSpacing: 1 }}>Card Name</label>
-                  <input
-                    ref={nameRef}
-                    value={cardName}
-                    onChange={e => setCardName(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && addLabel()}
-                    placeholder="e.g. 2021 Topps Chrome Trout PSA 10"
-                    style={{
-                      width: "100%", boxSizing: "border-box", padding: "9px 11px",
-                      border: "2px solid #1a1a1a", borderRadius: 4,
-                      fontFamily: "'Courier New', monospace", fontSize: 13, background: "#fafaf7",
-                    }}
-                  />
-                </div>
-                <div style={{ flex: "0 0 130px" }}>
-                  <label style={{ display: "block", fontSize: 10, fontFamily: "'Courier New', monospace", marginBottom: 4, color: "#888", textTransform: "uppercase", letterSpacing: 1 }}>Price ($)</label>
-                  <input
-                    value={price}
-                    onChange={e => setPrice(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && addLabel()}
-                    placeholder="0.00" type="number" min="0" step="0.01"
-                    style={{
-                      width: "100%", boxSizing: "border-box", padding: "9px 11px",
-                      border: "2px solid #1a1a1a", borderRadius: 4,
-                      fontFamily: "'Courier New', monospace", fontSize: 13, background: "#fafaf7",
-                    }}
-                  />
-                </div>
-                <button onClick={addLabel} style={{
-                  padding: "9px 22px", background: "#c8a84b", border: "2px solid #1a1a1a",
-                  borderRadius: 4, fontFamily: "'Courier New', monospace", fontWeight: 900,
-                  fontSize: 13, cursor: "pointer", boxShadow: "2px 2px 0 #1a1a1a",
-                }}>+ Add Label</button>
-              </div>
-            </div>
-
-            {labels.length === 0 ? (
-              <div className="no-print" style={{ textAlign: "center", color: "#bbb", fontFamily: "'Courier New', monospace", fontSize: 12, padding: "50px 0" }}>
-                Add a card above to generate your first QR label
-              </div>
-            ) : (
-              <>
-                <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                  <span style={{ fontFamily: "'Courier New', monospace", fontSize: 11, color: "#888", textTransform: "uppercase", letterSpacing: 1 }}>
-                    {labels.length} label{labels.length !== 1 ? "s" : ""} — Ctrl/⌘+P to print
-                  </span>
-                  <button onClick={() => setLabels([])} style={{
-                    background: "none", border: "1px solid #ccc", borderRadius: 4,
-                    padding: "3px 10px", fontFamily: "'Courier New', monospace", fontSize: 11,
-                    cursor: "pointer", color: "#aaa",
-                  }}>Clear All</button>
-                </div>
-                <div className="label-area" style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
-                  {labels.map(l => (
-                    <LabelCard key={l.id} name={l.name} price={l.price}
-                      onRemove={() => setLabels(prev => prev.filter(x => x.id !== l.id))} />
-                  ))}
-                </div>
-              </>
-            )}
-          </>
-        )}
-
-        {tab === "setup" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            <div style={{ background: "#fff", border: "2px solid #1a1a1a", borderRadius: 6, padding: 18, boxShadow: "3px 3px 0 #1a1a1a" }}>
-              <h3 style={{ margin: "0 0 10px", fontFamily: "'Courier New', monospace", fontSize: 12, textTransform: "uppercase", letterSpacing: 1, color: "#555" }}>Sheet Column Headers</h3>
-              <p style={{ margin: "0 0 10px", fontSize: 13, color: "#444", lineHeight: 1.6 }}>Paste these into Row 1 of your Google Sheet:</p>
-              <div style={{ position: "relative" }}>
-                <pre style={{ background: "#f5f0e8", border: "1px solid #ddd", borderRadius: 4, padding: "8px 12px", fontFamily: "'Courier New', monospace", fontSize: 12, margin: 0 }}>
-                  Date Purchased{"\t"}Card Name{"\t"}Purchase Price{"\t"}Scanned At
-                </pre>
-                <button onClick={() => { navigator.clipboard.writeText("Date Purchased\tCard Name\tPurchase Price\tScanned At"); setCopied("h"); setTimeout(() => setCopied(false), 1500); }}
-                  style={{ position: "absolute", top: 6, right: 8, background: "#c8a84b", border: "1px solid #1a1a1a", borderRadius: 3, padding: "2px 8px", fontFamily: "'Courier New', monospace", fontSize: 10, cursor: "pointer" }}>
-                  {copied === "h" ? "✓" : "Copy"}
-                </button>
-              </div>
-            </div>
-
-            <div style={{ background: "#fff", border: "2px solid #1a1a1a", borderRadius: 6, padding: 18, boxShadow: "3px 3px 0 #1a1a1a" }}>
-              <h3 style={{ margin: "0 0 10px", fontFamily: "'Courier New', monospace", fontSize: 12, textTransform: "uppercase", letterSpacing: 1, color: "#555" }}>Apps Script Code</h3>
-              <p style={{ margin: "0 0 10px", fontSize: 13, color: "#444", lineHeight: 1.6 }}>Extensions → Apps Script → paste → Deploy as Web App → Anyone</p>
-              <div style={{ position: "relative" }}>
-                <pre style={{ background: "#1a1a1a", color: "#c8a84b", borderRadius: 4, padding: "12px 14px", fontFamily: "'Courier New', monospace", fontSize: 11, overflowX: "auto", margin: 0, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{gasCode}</pre>
-                <button onClick={() => { navigator.clipboard.writeText(gasCode); setCopied("g"); setTimeout(() => setCopied(false), 1500); }}
-                  style={{ position: "absolute", top: 8, right: 10, background: "#c8a84b", border: "1px solid #666", borderRadius: 3, padding: "2px 8px", fontFamily: "'Courier New', monospace", fontSize: 10, cursor: "pointer" }}>
-                  {copied === "g" ? "✓" : "Copy"}
-                </button>
-              </div>
-            </div>
-
-            <div style={{ background: "#fffbe8", border: "2px solid #c8a84b", borderRadius: 6, padding: 14, fontFamily: "'Courier New', monospace", fontSize: 12, color: "#7a6200", lineHeight: 1.7 }}>
-              ✅ Your Apps Script URL is wired in. Scan any label with your phone camera → auto-logs to your sheet.
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
+
+function addLabel() {
+  const nameEl = document.getElementById("cardName");
+  const priceEl = document.getElementById("cardPrice");
+  const qtyEl = document.getElementById("cardQty");
+
+  const name = nameEl.value.trim();
+  const price = parseFloat(priceEl.value);
+  const qty = parseInt(qtyEl.value) || 1;
+
+  if (!name) { showToast("Please enter a card name.", "err"); nameEl.focus(); return; }
+  if (isNaN(price) || price < 0) { showToast("Please enter a valid price.", "err"); priceEl.focus(); return; }
+
+  const date = new Date().toISOString().split("T")[0];
+
+  for (let i = 0; i < qty; i++) {
+    const id = Date.now() + i;
+    labels.push({ id, name, price: price.toFixed(2), date });
+    renderLabel({ id, name, price: price.toFixed(2), date });
+    logToSheet(name, price.toFixed(2), date);
+    totalSpent += price;
+  }
+
+  updateStats();
+  nameEl.value = "";
+  priceEl.value = "";
+  qtyEl.value = "1";
+  nameEl.focus();
+
+  const msg = qty > 1 ? `✓ ${qty}× ${name} logged` : `✓ ${name} logged`;
+  showToast(msg, "ok");
+}
+
+function renderLabel({ id, name, price, date }) {
+  document.getElementById("empty-state").style.display = "none";
+
+  const t = new Date().toISOString().split("T")[0];
+  const url = `${SHEET_URL}?n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${t}`;
+
+  const card = document.createElement("div");
+  card.className = "label-card";
+  card.id = "label-" + id;
+  card.innerHTML = `
+    <button class="btn-remove no-print" onclick="removeLabel(${id})" title="Remove">✕</button>
+    <div class="lc-brand">PRICE<span>TRAX</span></div>
+    <div id="qr-${id}"></div>
+    <div class="lc-name">${escHtml(name)}</div>
+    <div class="lc-price">$${price}</div>
+    <div class="lc-date">${date}</div>
+  `;
+  document.getElementById("labels-grid").appendChild(card);
+
+  setTimeout(() => {
+    new QRCode(document.getElementById("qr-" + id), {
+      text: url,
+      width: 120,
+      height: 120,
+      colorDark: "#0f0f0f",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+  }, 50);
+}
+
+function removeLabel(id) {
+  const idx = labels.findIndex(l => l.id === id);
+  if (idx !== -1) {
+    totalSpent -= parseFloat(labels[idx].price);
+    labels.splice(idx, 1);
+  }
+  const el = document.getElementById("label-" + id);
+  if (el) el.remove();
+  updateStats();
+  if (labels.length === 0) {
+    document.getElementById("empty-state").style.display = "flex";
+  }
+}
+
+function clearAll() {
+  if (labels.length === 0) return;
+  if (!confirm("Clear all labels?")) return;
+  labels = [];
+  totalSpent = 0;
+  document.getElementById("labels-grid").innerHTML = "";
+  document.getElementById("empty-state").style.display = "flex";
+  updateStats();
+}
+
+function updateStats() {
+  const n = labels.length;
+  document.getElementById("stat-count").textContent = n;
+  document.getElementById("stat-total").textContent = "$" + totalSpent.toFixed(2);
+  document.getElementById("label-count").textContent =
+    n === 0 ? "No labels yet" : `${n} label${n !== 1 ? "s" : ""} — hit Print Labels to print`;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+document.getElementById("cardName").focus();
+</script>
+</body>
+</html>
