@@ -463,7 +463,7 @@ function showToast(msg, type) {
 }
 
 async function logToSheet(name, price, date) {
-  const url = `${SHEET_URL}?n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${date}`;
+  const url = `${SHEET_URL}?action=log&n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${date}`;
   try {
     await fetch(url, { method: "GET", mode: "no-cors" });
   } catch(err) {
