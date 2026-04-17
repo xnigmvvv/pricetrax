@@ -387,6 +387,9 @@
   <div class="header-sub">PriceTrax</div>
   <div class="header-actions">
     <button class="btn-print" onclick="window.print()">⎙ Print Labels</button>
+    <a href="https://docs.google.com/spreadsheets/d/1FZsoPeXGp1eXJw1S2X6UoxRypSLm3_tj7RpXWL0yWJo/edit" target="_blank" style="text-decoration:none;">
+      <button class="btn-print">📊 View Sheet</button>
+    </a>
   </div>
 </header>
 
@@ -499,6 +502,7 @@ function addLabel() {
   qtyEl.value = "1";
   nameEl.focus();
 
+  saveLabels();
   const msg = qty > 1 ? `✓ ${qty}× ${name} logged` : `✓ ${name} logged`;
   showToast(msg, "ok");
 }
@@ -543,6 +547,7 @@ function removeLabel(id) {
   const el = document.getElementById("label-" + id);
   if (el) el.remove();
   updateStats();
+  saveLabels();
   if (labels.length === 0) {
     document.getElementById("empty-state").style.display = "flex";
   }
@@ -556,6 +561,7 @@ function clearAll() {
   document.getElementById("labels-grid").innerHTML = "";
   document.getElementById("empty-state").style.display = "flex";
   updateStats();
+  saveLabels();
 }
 
 function updateStats() {
@@ -570,6 +576,29 @@ function escHtml(str) {
   return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
+// Load saved labels from localStorage
+function loadSaved() {
+  try {
+    const saved = localStorage.getItem("pricetrax_labels");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      parsed.forEach(l => {
+        labels.push(l);
+        totalSpent += parseFloat(l.price);
+        renderLabel(l);
+      });
+      updateStats();
+    }
+  } catch(e) { console.warn("Could not load saved labels", e); }
+}
+
+function saveLabels() {
+  try {
+    localStorage.setItem("pricetrax_labels", JSON.stringify(labels));
+  } catch(e) { console.warn("Could not save labels", e); }
+}
+
+loadSaved();
 document.getElementById("cardName").focus();
 </script>
 </body>
