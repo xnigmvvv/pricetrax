@@ -496,16 +496,20 @@ function showToast(msg, type) {
 }
 
 function logToSheet(name, price, date) {
-  const url = `${SHEET_URL}?action=log&n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${date}`;
-  fetch(url, { method: "GET", mode: "no-cors", cache: "no-cache" })
-    .catch(() => {
-      // Fallback: open in hidden iframe
-      const iframe = document.createElement("iframe");
-      iframe.style.cssText = "display:none;width:0;height:0;border:0;";
-      iframe.src = url;
-      document.body.appendChild(iframe);
-      setTimeout(() => iframe.remove(), 10000);
-    });
+  const callbackName = "cb_" + Date.now();
+  const url = `${SHEET_URL}?action=log&n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${date}&callback=${callbackName}`;
+  window[callbackName] = function() {
+    delete window[callbackName];
+    document.getElementById(callbackName) && document.getElementById(callbackName).remove();
+  };
+  const script = document.createElement("script");
+  script.id = callbackName;
+  script.src = url;
+  document.body.appendChild(script);
+  setTimeout(() => {
+    delete window[callbackName];
+    script.remove();
+  }, 10000);
 }
 
 function addLabel() {
