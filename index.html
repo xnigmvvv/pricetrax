@@ -394,6 +394,7 @@
         gap: 5pt !important;
         page-break-after: always;
         break-after: page;
+        page-break-inside: avoid;
         overflow: hidden !important;
       }
       .label-card .lc-brand { display: none !important; }
@@ -413,6 +414,7 @@
       #qr-container { flex-shrink: 0 !important; width: 1in !important; height: 1in !important; display: flex; align-items: center; justify-content: center; }
       [id^="qr-"] { width: 1in !important; height: 1in !important; }
       [id^="qr-"] img, [id^="qr-"] canvas { width: 1in !important; height: 1in !important; display: block !important; }
+      .label-card:last-child { page-break-after: avoid !important; break-after: avoid !important; }
     }
   </style>
 </head>
