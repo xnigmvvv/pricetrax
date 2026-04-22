@@ -20,10 +20,10 @@
   .pin-dot{width:5vw;height:5vw;border-radius:50%;background:#222;border:2px solid #444;}
   .pin-error{font-size:3.5vw;color:#cc0000;letter-spacing:2px;text-transform:uppercase;min-height:5vw;margin-bottom:4vw;}
   .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3vw;max-width:72vw;margin:0 auto;}
-  .pin-btn{background:#1a1a1a;border:1px solid #333;color:#fff;font-size:8vw;font-family:Impact,"Arial Narrow",sans-serif;padding:4vw;border-radius:2vw;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent;user-select:none;}
+  .pin-btn{background:#1a1a1a;border:1px solid #333;color:#fff;font-size:8vw;font-family:Impact,"Arial Narrow",sans-serif;padding:4vw;border-radius:2vw;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:manipulation;}
   .pin-btn:active{background:#cc0000;}
   .pin-zero{grid-column:2;}
-  .pin-del{background:#1a1a1a;border:1px solid #333;color:#cc0000;font-size:6vw;padding:4vw;border-radius:2vw;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent;user-select:none;}
+  .pin-del{background:#1a1a1a;border:1px solid #333;color:#cc0000;font-size:6vw;padding:4vw;border-radius:2vw;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:manipulation;}
 
   /* PRICE SCREEN */
   #price-screen{width:100%;text-align:center;display:none;}
@@ -50,17 +50,17 @@
   </div>
   <div class="pin-error" id="pin-error"></div>
   <div class="pin-grid">
-    <button class="pin-btn" onclick="enterDigit('1')">1</button>
-    <button class="pin-btn" onclick="enterDigit('2')">2</button>
-    <button class="pin-btn" onclick="enterDigit('3')">3</button>
-    <button class="pin-btn" onclick="enterDigit('4')">4</button>
-    <button class="pin-btn" onclick="enterDigit('5')">5</button>
-    <button class="pin-btn" onclick="enterDigit('6')">6</button>
-    <button class="pin-btn" onclick="enterDigit('7')">7</button>
-    <button class="pin-btn" onclick="enterDigit('8')">8</button>
-    <button class="pin-btn" onclick="enterDigit('9')">9</button>
-    <button class="pin-del pin-zero" onclick="deleteDigit()">&#9003;</button>
-    <button class="pin-btn" onclick="enterDigit('0')">0</button>
+    <button class="pin-btn" ontouchstart="enterDigit('1')" onclick="enterDigit('1')">1</button>
+    <button class="pin-btn" ontouchstart="enterDigit('2')" onclick="enterDigit('2')">2</button>
+    <button class="pin-btn" ontouchstart="enterDigit('3')" onclick="enterDigit('3')">3</button>
+    <button class="pin-btn" ontouchstart="enterDigit('4')" onclick="enterDigit('4')">4</button>
+    <button class="pin-btn" ontouchstart="enterDigit('5')" onclick="enterDigit('5')">5</button>
+    <button class="pin-btn" ontouchstart="enterDigit('6')" onclick="enterDigit('6')">6</button>
+    <button class="pin-btn" ontouchstart="enterDigit('7')" onclick="enterDigit('7')">7</button>
+    <button class="pin-btn" ontouchstart="enterDigit('8')" onclick="enterDigit('8')">8</button>
+    <button class="pin-btn" ontouchstart="enterDigit('9')" onclick="enterDigit('9')">9</button>
+    <button class="pin-del pin-zero" ontouchstart="deleteDigit()" onclick="deleteDigit()">&#9003;</button>
+    <button class="pin-btn" ontouchstart="enterDigit('0')" onclick="enterDigit('0')">0</button>
   </div>
 </div>
 
@@ -97,7 +97,11 @@
     document.getElementById("d3")
   ];
 
+  var lastTouch = 0;
   function enterDigit(digit) {
+    var now = Date.now();
+    if (now - lastTouch < 500) return;
+    lastTouch = now;
     if (entered.length >= 4) return;
     entered += digit;
     dotEls[entered.length - 1].style.background = "#cc0000";
