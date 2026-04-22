@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>PriceTrax — Badger Breaks</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -102,6 +102,21 @@
       display: grid;
       grid-template-columns: 380px 1fr;
       min-height: calc(100vh - 67px);
+    }
+
+    @media (max-width: 768px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .left-panel {
+        border-right: none;
+        border-bottom: 2px solid var(--black);
+      }
+      .header-logo .wordmark { font-size: 22px; }
+      .header-sub { display: none; }
+      .price-row { grid-template-columns: 1fr 1fr; }
+      .right-panel { padding: 16px; }
+      .label-card { width: 140px; }
     }
 
     /* ── LEFT PANEL ── */
