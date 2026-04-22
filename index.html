@@ -675,24 +675,25 @@ function printLabels() {
   win.document.write(`<!DOCTYPE html>
 <html><head>
 <style>
-  @page { size: 3.5in 1.125in landscape; margin: 0; }
+  @page { size: 1.125in 3.5in; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'IBM Plex Sans', Arial, sans-serif; background: white; }
   .label {
-    width: 3.5in;
-    height: 1.125in;
+    width: 1.125in;
+    height: 3.5in;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    padding: 4pt 6pt;
-    gap: 6pt;
+    justify-content: center;
+    padding: 4pt 3pt;
+    gap: 4pt;
     page-break-after: always;
     break-after: page;
     overflow: hidden;
   }
   .label:last-of-type { page-break-after: avoid; break-after: avoid; }
-  .label img { width: 0.95in; height: 0.95in; flex-shrink: 0; display: block; }
-  .name { font-size: 9pt; font-weight: 700; line-height: 1.3; word-break: break-word; flex: 1; }
+  .label img { width: 1in; height: 1in; flex-shrink: 0; display: block; }
+  .name { font-size: 7pt; font-weight: 700; line-height: 1.3; word-break: break-word; text-align: center; width: 100%; }
 </style>
 </head><body>
 ${labelHTML}
