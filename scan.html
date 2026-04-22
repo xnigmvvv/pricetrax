@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>PriceTrax</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;min-height:100vh;}
+  body{background:#0f0f0f;font-family:Impact,"Arial Narrow",sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:6vw;}
+
+  .brand{font-size:3vw;letter-spacing:4px;color:#444;text-transform:uppercase;margin-bottom:8vw;}
+  .brand span{color:#cc0000;}
+
+  /* PIN SCREEN */
+  #pin-screen{width:100%;text-align:center;}
+  .pin-name{font-size:7vw;color:#ffffff;line-height:1.2;margin-bottom:8vw;word-break:break-word;}
+  .pin-label{font-size:3.5vw;letter-spacing:3px;color:#555;text-transform:uppercase;margin-bottom:5vw;}
+  .pin-dots{display:flex;justify-content:center;gap:4vw;margin-bottom:8vw;}
+  .pin-dot{width:5vw;height:5vw;border-radius:50%;background:#222;border:2px solid #444;}
+  .pin-error{font-size:3.5vw;color:#cc0000;letter-spacing:2px;text-transform:uppercase;min-height:5vw;margin-bottom:4vw;}
+  .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3vw;max-width:72vw;margin:0 auto;}
+  .pin-btn{background:#1a1a1a;border:1px solid #333;color:#fff;font-size:8vw;font-family:Impact,"Arial Narrow",sans-serif;padding:4vw;border-radius:2vw;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent;user-select:none;}
+  .pin-btn:active{background:#cc0000;}
+  .pin-zero{grid-column:2;}
+  .pin-del{background:#1a1a1a;border:1px solid #333;color:#cc0000;font-size:6vw;padding:4vw;border-radius:2vw;cursor:pointer;transition:none;-webkit-tap-highlight-color:transparent;user-select:none;}
+
+  /* PRICE SCREEN */
+  #price-screen{width:100%;text-align:center;display:none;}
+  .price-name{font-size:9vw;color:#ffffff;line-height:1.2;margin-bottom:6vw;word-break:break-word;}
+  hr{border:none;border-top:2px solid #cc0000;width:20vw;margin:0 auto 6vw;}
+  .price-lbl{font-size:3vw;letter-spacing:3px;color:#555;text-transform:uppercase;margin-bottom:2vw;}
+  .price{font-size:28vw;color:#cc0000;line-height:1;letter-spacing:-1vw;margin-bottom:6vw;}
+  .price sup{font-size:12vw;vertical-align:super;letter-spacing:0;}
+  .price-date{font-size:3vw;color:#444;font-family:"Courier New",monospace;letter-spacing:1px;}
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div class="brand">PRICE<span>TRAX</span> &mdash; BADGER BREAKS</div>
+  <div class="pin-name" id="card-name"></div>
+  <div class="pin-label">Enter Staff PIN</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+  <div class="pin-grid">
+    <button class="pin-btn" onclick="enterDigit('1')">1</button>
+    <button class="pin-btn" onclick="enterDigit('2')">2</button>
+    <button class="pin-btn" onclick="enterDigit('3')">3</button>
+    <button class="pin-btn" onclick="enterDigit('4')">4</button>
+    <button class="pin-btn" onclick="enterDigit('5')">5</button>
+    <button class="pin-btn" onclick="enterDigit('6')">6</button>
+    <button class="pin-btn" onclick="enterDigit('7')">7</button>
+    <button class="pin-btn" onclick="enterDigit('8')">8</button>
+    <button class="pin-btn" onclick="enterDigit('9')">9</button>
+    <button class="pin-del pin-zero" onclick="deleteDigit()">&#9003;</button>
+    <button class="pin-btn" onclick="enterDigit('0')">0</button>
+  </div>
+</div>
+
+<!-- PRICE SCREEN -->
+<div id="price-screen">
+  <div class="brand">PRICE<span>TRAX</span> &mdash; BADGER BREAKS</div>
+  <div class="price-name" id="price-name"></div>
+  <hr>
+  <div class="price-lbl">Purchase Price</div>
+  <div class="price" id="price-display"></div>
+  <div class="price-date" id="price-date"></div>
+</div>
+
+<script>
+  // ── Config ──────────────────────────────
+  var PIN = "2323";
+  // ────────────────────────────────────────
+
+  // Parse URL params
+  var params = new URLSearchParams(window.location.search);
+  var name  = params.get("n") || "Unknown Card";
+  var price = parseFloat(params.get("p") || "0").toFixed(2);
+  var date  = params.get("t") || "";
+
+  // Populate card name on PIN screen
+  document.getElementById("card-name").textContent = name;
+
+  // PIN logic
+  var entered = "";
+  var dotEls = [
+    document.getElementById("d0"),
+    document.getElementById("d1"),
+    document.getElementById("d2"),
+    document.getElementById("d3")
+  ];
+
+  function enterDigit(digit) {
+    if (entered.length >= 4) return;
+    entered += digit;
+    dotEls[entered.length - 1].style.background = "#cc0000";
+    dotEls[entered.length - 1].style.borderColor = "#cc0000";
+    if (entered.length === 4) {
+      if (entered === PIN) {
+        // Show price instantly — no server call
+        document.getElementById("price-name").textContent = name;
+        document.getElementById("price-display").innerHTML = "<sup>$</sup>" + price;
+        document.getElementById("price-date").textContent = date ? "Purchased " + date : "";
+        document.getElementById("pin-screen").style.display = "none";
+        document.getElementById("price-screen").style.display = "block";
+      } else {
+        document.getElementById("pin-error").textContent = "Incorrect PIN";
+        setTimeout(function() {
+          entered = "";
+          dotEls.forEach(function(dot) {
+            dot.style.background = "#222";
+            dot.style.borderColor = "#444";
+          });
+          document.getElementById("pin-error").textContent = "";
+        }, 600);
+      }
+    }
+  }
+
+  function deleteDigit() {
+    if (entered.length === 0) return;
+    entered = entered.slice(0, -1);
+    dotEls[entered.length].style.background = "#222";
+    dotEls[entered.length].style.borderColor = "#444";
+    document.getElementById("pin-error").textContent = "";
+  }
+</script>
+</body>
+</html>
