@@ -671,29 +671,29 @@ function printLabels() {
     `;
   });
 
-  const win = window.open("", "_blank", "width=400,height=600");
+  const win = window.open("", "_blank", "width=600,height=400");
   win.document.write(`<!DOCTYPE html>
 <html><head>
 <style>
-  @page { size: 1.125in 3.5in; margin: 0; }
+  @page { size: 3.5in 1.125in landscape; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'IBM Plex Sans', Arial, sans-serif; background: white; }
+  body { font-family: 'IBM Plex Sans', Arial, sans-serif; background: white; width: 3.5in; }
   .label {
-    width: 1.125in;
-    height: 3.5in;
+    width: 3.5in;
+    height: 1.125in;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 4pt 3pt;
-    gap: 4pt;
+    padding: 3pt 4pt;
+    gap: 2pt;
     page-break-after: always;
     break-after: page;
     overflow: hidden;
   }
   .label:last-of-type { page-break-after: avoid; break-after: avoid; }
-  .label img { width: 1in; height: 1in; flex-shrink: 0; display: block; }
-  .name { font-size: 7pt; font-weight: 700; line-height: 1.3; word-break: break-word; text-align: center; width: 100%; }
+  .label img { width: 0.85in; height: 0.85in; flex-shrink: 0; display: block; }
+  .name { font-size: 7pt; font-weight: 700; line-height: 1.2; word-break: break-word; text-align: center; width: 100%; }
 </style>
 </head><body>
 ${labelHTML}
