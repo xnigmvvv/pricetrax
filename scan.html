@@ -82,8 +82,24 @@
   // Parse URL params
   var params = new URLSearchParams(window.location.search);
   var name  = params.get("n") || "Unknown Card";
-  var price = parseFloat(params.get("p") || "0").toFixed(2);
   var date  = params.get("t") || "";
+  var encodedPrice = params.get("p") || "";
+
+  // Decode price after PIN — same XOR key
+  function decodePrice(encoded, key) {
+    try {
+      var decoded = atob(encoded);
+      var result = "";
+      for (var i = 0; i < decoded.length; i++) {
+        result += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      }
+      return parseFloat(result).toFixed(2);
+    } catch(e) {
+      return "0.00";
+    }
+  }
+
+  var price = ""; // decoded after PIN
 
   // Populate card name on PIN screen
   document.getElementById("card-name").textContent = name;
@@ -104,6 +120,8 @@
     dotEls[entered.length - 1].style.borderColor = "#cc0000";
     if (entered.length === 4) {
       if (entered === PIN) {
+        // Decode price now that PIN is confirmed
+        price = decodePrice(encodedPrice, PIN);
         // Show price instantly — no server call
         document.getElementById("price-name").textContent = name;
         document.getElementById("price-display").innerHTML = "<sup>$</sup>" + price;
