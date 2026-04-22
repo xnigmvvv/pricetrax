@@ -440,6 +440,98 @@
 </head>
 <body>
 
+<!-- PIN OVERLAY -->
+<div id="pin-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0f0f0f;z-index:9999;display:flex;align-items:center;justify-content:center;padding:6vw;box-sizing:border-box;">
+  <div style="width:100%;max-width:340px;text-align:center;">
+    <div style="font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(16px,4vw,22px);letter-spacing:4px;color:#444;text-transform:uppercase;margin-bottom:8vw;">PRICE<span style="color:#cc0000;">TRAX</span> &mdash; BADGER BREAKS</div>
+    <div style="font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(12px,3.5vw,16px);letter-spacing:3px;color:#555;text-transform:uppercase;margin-bottom:5vw;">Enter Staff PIN</div>
+    <div style="display:flex;justify-content:center;gap:16px;margin-bottom:8vw;">
+      <div id="pd0" style="width:18px;height:18px;border-radius:50%;background:#222;border:2px solid #444;"></div>
+      <div id="pd1" style="width:18px;height:18px;border-radius:50%;background:#222;border:2px solid #444;"></div>
+      <div id="pd2" style="width:18px;height:18px;border-radius:50%;background:#222;border:2px solid #444;"></div>
+      <div id="pd3" style="width:18px;height:18px;border-radius:50%;background:#222;border:2px solid #444;"></div>
+    </div>
+    <div id="pin-overlay-error" style="font-family:Impact,'Arial Narrow',sans-serif;font-size:14px;color:#cc0000;letter-spacing:2px;text-transform:uppercase;min-height:20px;margin-bottom:16px;"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:260px;margin:0 auto;">
+      <button id="pb1" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">1</button>
+      <button id="pb2" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">2</button>
+      <button id="pb3" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">3</button>
+      <button id="pb4" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">4</button>
+      <button id="pb5" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">5</button>
+      <button id="pb6" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">6</button>
+      <button id="pb7" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">7</button>
+      <button id="pb8" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">8</button>
+      <button id="pb9" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">9</button>
+      <button id="pbdel" style="background:#1a1a1a;border:1px solid #333;color:#cc0000;font-size:24px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;grid-column:2;">&#9003;</button>
+      <button id="pb0" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:32px;font-family:Impact,'Arial Narrow',sans-serif;padding:16px;border-radius:8px;cursor:pointer;touch-action:manipulation;">0</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var PIN = "2323";
+  var entered = "";
+  var dotEls = [
+    document.getElementById("pd0"),
+    document.getElementById("pd1"),
+    document.getElementById("pd2"),
+    document.getElementById("pd3")
+  ];
+
+  function enterDigit(digit) {
+    if (entered.length >= 4) return;
+    entered += digit;
+    dotEls[entered.length - 1].style.background = "#cc0000";
+    dotEls[entered.length - 1].style.borderColor = "#cc0000";
+    if (entered.length === 4) {
+      if (entered === PIN) {
+        document.getElementById("pin-overlay").style.display = "none";
+        sessionStorage.setItem("pt_auth", "1");
+      } else {
+        document.getElementById("pin-overlay-error").textContent = "Incorrect PIN";
+        setTimeout(function() {
+          entered = "";
+          dotEls.forEach(function(d) { d.style.background = "#222"; d.style.borderColor = "#444"; });
+          document.getElementById("pin-overlay-error").textContent = "";
+        }, 600);
+      }
+    }
+  }
+
+  function deleteDigit() {
+    if (entered.length === 0) return;
+    entered = entered.slice(0, -1);
+    dotEls[entered.length].style.background = "#222";
+    dotEls[entered.length].style.borderColor = "#444";
+    document.getElementById("pin-overlay-error").textContent = "";
+  }
+
+  // Check if already authenticated this session
+  if (sessionStorage.getItem("pt_auth") === "1") {
+    document.getElementById("pin-overlay").style.display = "none";
+  }
+
+  function attachBtn(id, fn) {
+    var el = document.getElementById(id);
+    el.addEventListener('touchend', function(e) { e.preventDefault(); fn(); }, { passive: false });
+    el.addEventListener('click', fn);
+  }
+
+  attachBtn('pb1', function(){ enterDigit('1'); });
+  attachBtn('pb2', function(){ enterDigit('2'); });
+  attachBtn('pb3', function(){ enterDigit('3'); });
+  attachBtn('pb4', function(){ enterDigit('4'); });
+  attachBtn('pb5', function(){ enterDigit('5'); });
+  attachBtn('pb6', function(){ enterDigit('6'); });
+  attachBtn('pb7', function(){ enterDigit('7'); });
+  attachBtn('pb8', function(){ enterDigit('8'); });
+  attachBtn('pb9', function(){ enterDigit('9'); });
+  attachBtn('pb0', function(){ enterDigit('0'); });
+  attachBtn('pbdel', deleteDigit);
+})();
+</script>
+
 <header class="header no-print">
   <div class="header-logo">
     <span style="display:inline-block;width:18px;height:18px;background:var(--gold);border-radius:2px;transform:rotate(45deg);flex-shrink:0;margin-right:4px;"></span><span class="wordmark">PRICE<span>TRAX</span></span>
