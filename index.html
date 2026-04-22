@@ -564,7 +564,7 @@ function renderLabel({ id, name, price, date }) {
   document.getElementById("empty-state").style.display = "none";
 
   const t = new Date().toISOString().split("T")[0];
-  const url = `https://xnigmvvv.github.io/pricetrax/scan.html?n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${t}`;
+  const url = `https://pricetrax.badgerbreaks.com/scan.html?n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${t}`;
 
   const card = document.createElement("div");
   card.className = "label-card";
