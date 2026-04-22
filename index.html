@@ -675,25 +675,26 @@ function printLabels() {
   win.document.write(`<!DOCTYPE html>
 <html><head>
 <style>
-  @page { size: 3.5in 1.125in landscape; margin: 0; }
+  @page { size: 1.125in 3.5in portrait; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'IBM Plex Sans', Arial, sans-serif; background: white; width: 3.5in; }
+  html, body { margin: 0; padding: 0; width: 1.125in; height: 3.5in; overflow: hidden; background: white; font-family: 'IBM Plex Sans', Arial, sans-serif; }
   .label {
-    width: 3.5in;
-    height: 1.125in;
+    width: 1.125in;
+    height: 3.5in;
+    max-height: 3.5in;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3pt 4pt;
-    gap: 2pt;
+    padding: 4pt 3pt;
+    gap: 4pt;
+    overflow: hidden;
     page-break-after: always;
     break-after: page;
-    overflow: hidden;
   }
-  .label:last-of-type { page-break-after: avoid; break-after: avoid; }
-  .label img { width: 0.85in; height: 0.85in; flex-shrink: 0; display: block; }
-  .name { font-size: 7pt; font-weight: 700; line-height: 1.2; word-break: break-word; text-align: center; width: 100%; }
+  .label:last-child { page-break-after: avoid !important; break-after: avoid !important; }
+  .label img { width: 1in; height: 1in; flex-shrink: 0; display: block; }
+  .name { font-size: 7pt; font-weight: 700; line-height: 1.3; word-break: break-word; text-align: center; width: 100%; overflow: hidden; }
 </style>
 </head><body>
 ${labelHTML}
