@@ -50,17 +50,17 @@
   </div>
   <div class="pin-error" id="pin-error"></div>
   <div class="pin-grid">
-    <button class="pin-btn" ontouchstart="enterDigit('1')" onclick="enterDigit('1')">1</button>
-    <button class="pin-btn" ontouchstart="enterDigit('2')" onclick="enterDigit('2')">2</button>
-    <button class="pin-btn" ontouchstart="enterDigit('3')" onclick="enterDigit('3')">3</button>
-    <button class="pin-btn" ontouchstart="enterDigit('4')" onclick="enterDigit('4')">4</button>
-    <button class="pin-btn" ontouchstart="enterDigit('5')" onclick="enterDigit('5')">5</button>
-    <button class="pin-btn" ontouchstart="enterDigit('6')" onclick="enterDigit('6')">6</button>
-    <button class="pin-btn" ontouchstart="enterDigit('7')" onclick="enterDigit('7')">7</button>
-    <button class="pin-btn" ontouchstart="enterDigit('8')" onclick="enterDigit('8')">8</button>
-    <button class="pin-btn" ontouchstart="enterDigit('9')" onclick="enterDigit('9')">9</button>
-    <button class="pin-del pin-zero" ontouchstart="deleteDigit()" onclick="deleteDigit()">&#9003;</button>
-    <button class="pin-btn" ontouchstart="enterDigit('0')" onclick="enterDigit('0')">0</button>
+    <button class="pin-btn" id="b1">1</button>
+    <button class="pin-btn" id="b2">2</button>
+    <button class="pin-btn" id="b3">3</button>
+    <button class="pin-btn" id="b4">4</button>
+    <button class="pin-btn" id="b5">5</button>
+    <button class="pin-btn" id="b6">6</button>
+    <button class="pin-btn" id="b7">7</button>
+    <button class="pin-btn" id="b8">8</button>
+    <button class="pin-btn" id="b9">9</button>
+    <button class="pin-del pin-zero" id="bdel">&#9003;</button>
+    <button class="pin-btn" id="b0">0</button>
   </div>
 </div>
 
@@ -97,12 +97,9 @@
     document.getElementById("d3")
   ];
 
-  var processing = false;
   function enterDigit(digit) {
-    if (processing || entered.length >= 4) return;
-    processing = true;
+    if (entered.length >= 4) return;
     entered += digit;
-    setTimeout(function(){ processing = false; }, 50);
     dotEls[entered.length - 1].style.background = "#cc0000";
     dotEls[entered.length - 1].style.borderColor = "#cc0000";
     if (entered.length === 4) {
@@ -134,6 +131,28 @@
     dotEls[entered.length].style.borderColor = "#444";
     document.getElementById("pin-error").textContent = "";
   }
+
+  // Attach touch listeners — preventDefault kills the 300ms iOS click delay
+  function attachBtn(id, fn) {
+    var el = document.getElementById(id);
+    el.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      fn();
+    }, { passive: false });
+    el.addEventListener('click', fn);
+  }
+
+  attachBtn('b1', function(){ enterDigit('1'); });
+  attachBtn('b2', function(){ enterDigit('2'); });
+  attachBtn('b3', function(){ enterDigit('3'); });
+  attachBtn('b4', function(){ enterDigit('4'); });
+  attachBtn('b5', function(){ enterDigit('5'); });
+  attachBtn('b6', function(){ enterDigit('6'); });
+  attachBtn('b7', function(){ enterDigit('7'); });
+  attachBtn('b8', function(){ enterDigit('8'); });
+  attachBtn('b9', function(){ enterDigit('9'); });
+  attachBtn('b0', function(){ enterDigit('0'); });
+  attachBtn('bdel', deleteDigit);
 </script>
 </body>
 </html>
