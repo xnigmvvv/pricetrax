@@ -564,7 +564,16 @@ function renderLabel({ id, name, price, date }) {
   document.getElementById("empty-state").style.display = "none";
 
   const t = new Date().toISOString().split("T")[0];
-  const url = `https://pricetrax.badgerbreaks.com/scan.html?n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${t}`;
+  // Simple encode — XOR each char with PIN key so price isn't visible in URL
+  function encodePrice(price) {
+    var key = "2323";
+    var result = "";
+    for (var i = 0; i < price.length; i++) {
+      result += String.fromCharCode(price.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return btoa(result);
+  }
+  const url = `https://pricetrax.badgerbreaks.com/scan.html?n=${encodeURIComponent(name)}&p=${encodePrice(price)}&t=${t}`;
 
   const card = document.createElement("div");
   card.className = "label-card";
