@@ -370,51 +370,56 @@
     /* ── PRINT STYLES ── */
     @media print {
       @page {
-        size: 3.5in 1.125in landscape;
+        size: 1.125in 3.5in;
         margin: 0;
       }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-sizing: border-box; }
       .header, .left-panel, .right-header, .btn-remove, .toast, .empty-state { display: none !important; }
-      body { background: white; margin: 0; padding: 0; width: 3.5in; height: 1.125in; overflow: hidden; }
-      .layout { display: block; width: 3.5in; }
-      .right-panel { padding: 0; margin: 0; width: 3.5in; }
+      body { background: white; margin: 0; padding: 0; overflow: hidden; }
+      .layout { display: block; }
+      .right-panel { padding: 0; margin: 0; }
       .labels-grid { gap: 0; display: block; margin: 0; padding: 0; }
       .label-card {
         box-shadow: none !important;
         border: none !important;
         border-radius: 0 !important;
-        width: 3.5in !important;
-        height: 1.125in !important;
+        width: 1.125in !important;
+        height: 3.5in !important;
         min-height: 0 !important;
-        padding: 3pt 5pt !important;
+        max-height: 3.5in !important;
+        padding: 4pt 3pt !important;
         margin: 0 !important;
         display: flex !important;
-        flex-direction: row !important;
+        flex-direction: column !important;
         align-items: center !important;
-        gap: 5pt !important;
-        page-break-after: always;
-        break-after: page;
-        page-break-inside: avoid;
+        justify-content: center !important;
+        gap: 4pt !important;
         overflow: hidden !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: always !important;
+        break-after: page !important;
+      }
+      .label-card:last-of-type {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
       }
       .label-card .lc-brand { display: none !important; }
       .label-card .lc-date { display: none !important; }
       .label-card .lc-price { display: none !important; }
       .label-card .lc-name {
-        font-size: 8pt !important;
+        font-size: 7pt !important;
         font-weight: 700 !important;
-        text-align: left !important;
+        text-align: center !important;
         word-break: break-word !important;
-        flex: 1 !important;
-        max-width: 2.3in !important;
+        width: 100% !important;
         line-height: 1.2 !important;
         overflow: hidden !important;
         font-family: 'IBM Plex Sans', sans-serif !important;
       }
-      #qr-container { flex-shrink: 0 !important; width: 1in !important; height: 1in !important; display: flex; align-items: center; justify-content: center; }
-      [id^="qr-"] { width: 1in !important; height: 1in !important; }
+      #qr-container { flex-shrink: 0 !important; width: 1in !important; height: 1in !important; display: flex !important; align-items: center !important; justify-content: center !important; overflow: hidden !important; }
+      [id^="qr-"] { width: 1in !important; height: 1in !important; overflow: hidden !important; }
       [id^="qr-"] img, [id^="qr-"] canvas { width: 1in !important; height: 1in !important; display: block !important; }
-      .label-card:last-child { page-break-after: avoid !important; break-after: avoid !important; }
     }
   </style>
 </head>
