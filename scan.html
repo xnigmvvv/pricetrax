@@ -97,13 +97,12 @@
     document.getElementById("d3")
   ];
 
-  var lastTouch = 0;
+  var processing = false;
   function enterDigit(digit) {
-    var now = Date.now();
-    if (now - lastTouch < 500) return;
-    lastTouch = now;
-    if (entered.length >= 4) return;
+    if (processing || entered.length >= 4) return;
+    processing = true;
     entered += digit;
+    setTimeout(function(){ processing = false; }, 50);
     dotEls[entered.length - 1].style.background = "#cc0000";
     dotEls[entered.length - 1].style.borderColor = "#cc0000";
     if (entered.length === 4) {
