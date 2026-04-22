@@ -370,40 +370,47 @@
     /* ── PRINT STYLES ── */
     @media print {
       @page {
-        size: 3.5in 1.125in landscape;
+        size: 3.5in 1.125in;
         margin: 0;
       }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .header, .left-panel, .right-header, .btn-remove, .toast, .empty-state { display: none !important; }
-      body { background: white; margin: 0; padding: 0; }
-      .layout { display: block; }
-      .right-panel { padding: 0; }
-      .labels-grid { gap: 0; display: block; }
+      body { background: white; margin: 0; padding: 0; overflow: hidden; }
+      .layout { display: block; margin: 0; padding: 0; }
+      .right-panel { padding: 0; margin: 0; overflow: hidden; }
+      .labels-grid { gap: 0; display: block; margin: 0; padding: 0; }
       .label-card {
         box-shadow: none;
         border: none;
+        border-radius: 0;
         width: 3.5in;
         height: 1.125in;
-        padding: 4px 6px;
+        min-height: 0;
+        padding: 4pt 6pt;
+        margin: 0;
         display: flex;
         flex-direction: row;
         align-items: center;
-        gap: 6px;
+        gap: 6pt;
         page-break-after: always;
         break-after: page;
+        overflow: hidden;
       }
-      .label-card .lc-brand { display: none; }
-      .label-card .lc-date { display: none; }
-      .label-card .lc-price { display: none; }
+      .label-card .lc-brand { display: none !important; }
+      .label-card .lc-date { display: none !important; }
+      .label-card .lc-price { display: none !important; }
       .label-card .lc-name {
-        font-size: 11px;
+        font-size: 9pt;
         font-weight: 700;
         text-align: left;
         word-break: break-word;
         flex: 1;
-        max-width: none;
-        line-height: 1.3;
+        max-width: 2.2in;
+        line-height: 1.25;
+        overflow: hidden;
       }
-      #qr-container { flex-shrink: 0; }
+      #qr-container, [id^="qr-"] { flex-shrink: 0; width: 0.9in; height: 0.9in; }
+      [id^="qr-"] img, [id^="qr-"] canvas { width: 0.9in !important; height: 0.9in !important; }
     }
   </style>
 </head>
