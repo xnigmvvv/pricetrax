@@ -657,7 +657,58 @@ function printLabels() {
     showToast("No labels to print.", "err");
     return;
   }
-  window.print();
+
+  // Build label HTML for each card
+  let labelHTML = "";
+  labels.forEach(l => {
+    const url = `${SHEET_URL}?n=${encodeURIComponent(l.name)}&p=${encodeURIComponent(l.price)}&t=${l.date || new Date().toISOString().split("T")[0]}`;
+    const qrDataUrl = getQRDataUrl(l.id);
+    labelHTML += `
+      <div class="label">
+        <img src="${qrDataUrl}" width="270" height="270"/>
+        <div class="name">${l.name}</div>
+      </div>
+    `;
+  });
+
+  const win = window.open("", "_blank", "width=400,height=600");
+  win.document.write(`<!DOCTYPE html>
+<html><head>
+<style>
+  @page { size: 3.5in 1.125in landscape; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans', Arial, sans-serif; background: white; }
+  .label {
+    width: 3.5in;
+    height: 1.125in;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4pt 6pt;
+    gap: 6pt;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+  }
+  .label:last-of-type { page-break-after: avoid; break-after: avoid; }
+  .label img { width: 0.95in; height: 0.95in; flex-shrink: 0; display: block; }
+  .name { font-size: 9pt; font-weight: 700; line-height: 1.3; word-break: break-word; flex: 1; }
+</style>
+</head><body>
+${labelHTML}
+<script>window.onload = function(){ window.print(); window.onafterprint = function(){ window.close(); }; }<\/script>
+</body></html>`);
+  win.document.close();
+}
+
+function getQRDataUrl(id) {
+  const el = document.getElementById("qr-" + id);
+  if (!el) return "";
+  const canvas = el.querySelector("canvas");
+  if (canvas) return canvas.toDataURL("image/png");
+  const img = el.querySelector("img");
+  if (img) return img.src;
+  return "";
 }
 
 document.getElementById("cardName").focus();
