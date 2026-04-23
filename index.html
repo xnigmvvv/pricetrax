@@ -774,18 +774,21 @@ function printLabels() {
     return;
   }
 
-  // Build label HTML for each card
+  // Build label HTML — pair 2 per sheet stacked vertically
   let labelHTML = "";
-  labels.forEach(l => {
-    const url = `${SHEET_URL}?n=${encodeURIComponent(l.name)}&p=${encodeURIComponent(l.price)}&t=${l.date || new Date().toISOString().split("T")[0]}`;
-    const qrDataUrl = getQRDataUrl(l.id);
-    labelHTML += `
-      <div class="label">
-        <img src="${qrDataUrl}" width="270" height="270"/>
-        <div class="name">${l.name}</div>
-      </div>
-    `;
-  });
+  for (let i = 0; i < labels.length; i += 2) {
+    const a = labels[i];
+    const b = labels[i + 1];
+    const qrA = getQRDataUrl(a.id);
+    const qrB = b ? getQRDataUrl(b.id) : null;
+    labelHTML += `<div class="sheet">`;
+    labelHTML += `<div class="label"><img src="${qrA}"/><div class="name">${a.name}</div></div>`;
+    if (qrB) {
+      labelHTML += `<div class="divider"></div>`;
+      labelHTML += `<div class="label"><img src="${qrB}"/><div class="name">${b.name}</div></div>`;
+    }
+    labelHTML += `</div>`;
+  }
 
   const win = window.open("", "_blank", "width=600,height=400");
   win.document.write(`<!DOCTYPE html>
@@ -793,24 +796,33 @@ function printLabels() {
 <style>
   @page { size: 1.125in 3.5in portrait; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { margin: 0; padding: 0; width: 1.125in; height: 3.5in; overflow: hidden; background: white; font-family: 'IBM Plex Sans', Arial, sans-serif; }
-  .label {
+  html, body { margin: 0; padding: 0; width: 1.125in; background: white; font-family: 'IBM Plex Sans', Arial, sans-serif; }
+  .sheet {
     width: 1.125in;
     height: 3.5in;
-    max-height: 3.5in;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+  }
+  .sheet:last-child { page-break-after: avoid !important; break-after: avoid !important; }
+  .label {
+    width: 1.125in;
+    height: 1.6in;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 4pt 3pt;
-    gap: 4pt;
+    padding: 3pt 2pt;
+    gap: 2pt;
     overflow: hidden;
-    page-break-after: always;
-    break-after: page;
   }
-  .label:last-child { page-break-after: avoid !important; break-after: avoid !important; }
-  .label img { width: 1in; height: 1in; flex-shrink: 0; display: block; }
-  .name { font-size: 7pt; font-weight: 700; line-height: 1.3; word-break: break-word; text-align: center; width: 100%; overflow: hidden; }
+  .divider { width: 90%; height: 0.5pt; background: #ccc; flex-shrink: 0; }
+  .label img { width: 0.9in; height: 0.9in; flex-shrink: 0; display: block; }
+  .name { font-size: 6pt; font-weight: 700; line-height: 1.2; word-break: break-word; text-align: center; width: 100%; overflow: hidden; }
 </style>
 </head><body>
 ${labelHTML}
