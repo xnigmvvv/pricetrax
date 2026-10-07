@@ -539,6 +539,7 @@
   <div class="header-sub">PriceTrax</div>
   <div class="header-actions">
     <button class="btn-print" onclick="printLabels()">⎙ Print Labels</button>
+    <button class="btn-print" onclick="logAllToSheet()">📤 Log All to Sheet</button>
     <a href="https://docs.google.com/spreadsheets/d/1FZsoPeXGp1eXJw1S2X6UoxRypSLm3_tj7RpXWL0yWJo/edit" target="_blank" style="text-decoration:none;">
       <button class="btn-print">📊 View Sheet</button>
     </a>
@@ -618,20 +619,20 @@ function showToast(msg, type) {
 }
 
 function logToSheet(name, price, date) {
-  const callbackName = "cb_" + Date.now();
-  const url = `${SHEET_URL}?action=log&n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${date}&callback=${callbackName}`;
-  window[callbackName] = function() {
-    delete window[callbackName];
-    document.getElementById(callbackName) && document.getElementById(callbackName).remove();
-  };
-  const script = document.createElement("script");
-  script.id = callbackName;
-  script.src = url;
-  document.body.appendChild(script);
-  setTimeout(() => {
-    delete window[callbackName];
-    script.remove();
-  }, 10000);
+  const url = `${SHEET_URL}?action=log&n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${date}`;
+  fetch(url, { mode: "no-cors" }).catch(function() {});
+}
+
+function logAllToSheet() {
+  if (!labels.length) { showToast("No labels to log.", "err"); return; }
+  let count = 0;
+  labels.forEach(function(l, i) {
+    setTimeout(function() {
+      logToSheet(l.name, l.price, l.date);
+      count++;
+      if (count === labels.length) showToast(`✓ Logged ${count} card${count !== 1 ? "s" : ""} to sheet`, "ok");
+    }, i * 300);
+  });
 }
 
 function addLabel() {
