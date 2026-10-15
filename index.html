@@ -540,6 +540,7 @@
   <div class="header-actions">
     <button class="btn-print" onclick="printLabels()">⎙ Print Labels</button>
     <button class="btn-print" onclick="logAllToSheet()">📤 Log All to Sheet</button>
+    <button class="btn-print" onclick="importFromSheet()">📥 Import from Sheet</button>
     <a href="https://docs.google.com/spreadsheets/d/1FZsoPeXGp1eXJw1S2X6UoxRypSLm3_tj7RpXWL0yWJo/edit" target="_blank" style="text-decoration:none;">
       <button class="btn-print">📊 View Sheet</button>
     </a>
@@ -605,7 +606,7 @@
 </div>
 
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxFwky0fg4MaekMMi53meyFNgQNQuEdAnFP-Na3diwWchir1OYF0CJkm0xMfzueogmNQw/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyYjmBcOhDHnH9dNxTdWIpeC9I1H5M2YlbHrYr4I3hFiae_6OPYZWqTJh-0YKrIVDbKow/exec";
 
 let labels = [];
 let totalSpent = 0;
@@ -621,6 +622,43 @@ function showToast(msg, type) {
 function logToSheet(name, price, date) {
   const url = `${SHEET_URL}?action=log&n=${encodeURIComponent(name)}&p=${encodeURIComponent(price)}&t=${date}`;
   fetch(url, { mode: "no-cors" }).catch(function() {});
+}
+
+function importFromSheet() {
+  showToast("Importing from sheet...", "ok");
+  const callbackName = "sheetImport_" + Date.now();
+  const url = `${SHEET_URL}?action=fetch&callback=${callbackName}`;
+  window[callbackName] = function(data) {
+    delete window[callbackName];
+    document.getElementById(callbackName) && document.getElementById(callbackName).remove();
+    if (!data || !data.length) { showToast("No data found in sheet.", "err"); return; }
+    // Clear existing labels and rebuild from sheet
+    labels = [];
+    totalSpent = 0;
+    document.getElementById("labels-grid").innerHTML = "";
+    document.getElementById("empty-state").style.display = "block";
+    data.forEach(function(row, i) {
+      const id = Date.now() + i;
+      const entry = { id, name: row.name, price: parseFloat(row.price).toFixed(2), date: row.date };
+      labels.push(entry);
+      renderLabel(entry);
+      totalSpent += parseFloat(row.price);
+    });
+    updateStats();
+    saveLabels();
+    showToast(`✓ Imported ${data.length} card${data.length !== 1 ? "s" : ""} from sheet`, "ok");
+  };
+  const script = document.createElement("script");
+  script.id = callbackName;
+  script.src = url;
+  document.body.appendChild(script);
+  setTimeout(function() {
+    if (window[callbackName]) {
+      delete window[callbackName];
+      script.remove();
+      showToast("Import timed out. Try again.", "err");
+    }
+  }, 10000);
 }
 
 function logAllToSheet() {
