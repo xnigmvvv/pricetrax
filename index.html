@@ -744,7 +744,8 @@ function runImport(mode) {
     document.getElementById(callbackName) && document.getElementById(callbackName).remove();
     if (!data || !data.length) { showToast("No data found in sheet.", "err"); return; }
     const filtered = data.filter(function(row) {
-      return row.date >= fromDate && row.date <= toDate;
+      const d = (row.date || "").substring(0, 10);
+      return d >= fromDate && d <= toDate;
     });
     if (!filtered.length) { showToast("No cards found for that date range.", "err"); return; }
     labels = [];
@@ -753,7 +754,8 @@ function runImport(mode) {
     document.getElementById("empty-state").style.display = "block";
     filtered.forEach(function(row, i) {
       const id = Date.now() + i;
-      const entry = { id, name: row.name, price: parseFloat(row.price).toFixed(2), date: row.date };
+      const rowDate = (row.date || "").substring(0, 10);
+      const entry = { id, name: row.name, price: parseFloat(row.price).toFixed(2), date: rowDate };
       labels.push(entry);
       renderLabel(entry);
       totalSpent += parseFloat(row.price);
