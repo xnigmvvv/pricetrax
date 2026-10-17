@@ -97,6 +97,54 @@
 
     .btn-print:hover { border-color: var(--gold); color: var(--gold); }
 
+    .btn-menu {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid #333;
+      color: #666;
+      width: 36px;
+      height: 36px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 18px;
+      position: relative;
+    }
+    .btn-menu:hover { border-color: var(--gold); color: var(--gold); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 64px;
+      right: 16px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-top: 2px solid var(--gold);
+      border-radius: 4px;
+      z-index: 500;
+      min-width: 200px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .mobile-menu.open { display: block; }
+    .mobile-menu button, .mobile-menu a {
+      display: block;
+      width: 100%;
+      padding: 13px 16px;
+      background: none;
+      border: none;
+      border-bottom: 1px solid #222;
+      color: #ccc;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      text-align: left;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+    .mobile-menu button:hover, .mobile-menu a:hover { background: #222; color: #fff; }
+    .mobile-menu button:last-child, .mobile-menu a:last-child { border-bottom: none; }
+
     /* ── LAYOUT ── */
     .layout {
       display: grid;
@@ -105,18 +153,26 @@
     }
 
     @media (max-width: 768px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-      .left-panel {
-        border-right: none;
-        border-bottom: 2px solid var(--black);
-      }
-      .header-logo .wordmark { font-size: 22px; }
+      .layout { grid-template-columns: 1fr; }
+      .left-panel { border-right: none; border-bottom: 2px solid var(--black); padding: 16px; gap: 16px; }
+      .header { padding: 0 16px; }
+      .header-logo .wordmark { font-size: 20px; }
       .header-sub { display: none; }
-      .price-row { grid-template-columns: 1fr 1fr; }
-      .right-panel { padding: 16px; }
-      .label-card { width: 140px; }
+      .header-actions { gap: 6px; }
+      .btn-print { display: none; }
+      .btn-menu { display: flex !important; }
+      .right-panel { padding: 12px; }
+      .labels-grid { gap: 10px; }
+      .label-card { width: 100%; flex-direction: row; align-items: center; padding: 10px 12px; gap: 12px; }
+      .label-card #qr-container { flex-shrink: 0; width: 60px; height: 60px; }
+      .label-card [id^="qr-"] { width: 60px !important; height: 60px !important; }
+      .label-card [id^="qr-"] img, .label-card [id^="qr-"] canvas { width: 60px !important; height: 60px !important; }
+      .label-card .lc-info { display: flex; flex-direction: column; flex: 1; align-items: flex-start; gap: 2px; min-width: 0; }
+      .label-card .lc-brand { display: none; }
+      .label-card .lc-name { font-size: 12px; text-align: left; max-width: 100%; }
+      .label-card .lc-price { font-size: 18px; border-top: none; padding-top: 0; width: auto; text-align: left; }
+      .label-card .lc-date { font-size: 9px; }
+      .right-header { margin-bottom: 12px; }
     }
 
     /* ── LEFT PANEL ── */
@@ -338,6 +394,8 @@
 
     .label-card .lc-brand span { color: var(--gold); }
 
+    .label-card .lc-info { display: contents; }
+
     .label-card .lc-name {
       font-family: 'IBM Plex Sans', sans-serif;
       font-size: 10px;
@@ -440,6 +498,27 @@
 </head>
 <body>
 
+<!-- IMPORT MODAL -->
+<div id="import-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:8000;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #333;border-top:3px solid #cc0000;border-radius:6px;padding:28px;width:90%;max-width:360px;font-family:'IBM Plex Mono',monospace;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;letter-spacing:2px;margin-bottom:20px;">IMPORT FROM SHEET</div>
+    <button onclick="runImport('today')" style="width:100%;padding:13px;background:#cc0000;border:none;color:#fff;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;border-radius:4px;cursor:pointer;margin-bottom:12px;">📅 Import Today's Cards</button>
+    <div style="color:#555;font-size:11px;text-align:center;margin-bottom:16px;letter-spacing:1px;">— OR CUSTOM RANGE —</div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div style="flex:1;">
+        <div style="color:#888;font-size:10px;letter-spacing:1px;margin-bottom:4px;">FROM</div>
+        <input type="date" id="import-from" style="width:100%;padding:8px;background:#0f0f0f;border:1px solid #333;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:12px;border-radius:3px;">
+      </div>
+      <div style="flex:1;">
+        <div style="color:#888;font-size:10px;letter-spacing:1px;margin-bottom:4px;">TO</div>
+        <input type="date" id="import-to" style="width:100%;padding:8px;background:#0f0f0f;border:1px solid #333;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:12px;border-radius:3px;">
+      </div>
+    </div>
+    <button onclick="runImport('range')" style="width:100%;padding:13px;background:#222;border:1px solid #444;color:#fff;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;border-radius:4px;cursor:pointer;margin-bottom:12px;">📥 Import Range</button>
+    <button onclick="document.getElementById('import-modal').style.display='none'" style="width:100%;padding:10px;background:none;border:1px solid #333;color:#555;font-family:'IBM Plex Mono',monospace;font-size:12px;border-radius:4px;cursor:pointer;">Cancel</button>
+  </div>
+</div>
+
 <!-- PIN OVERLAY -->
 <div id="pin-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0f0f0f;z-index:9999;display:flex;align-items:center;justify-content:center;padding:6vw;box-sizing:border-box;">
   <div style="width:100%;max-width:340px;text-align:center;">
@@ -540,12 +619,20 @@
   <div class="header-actions">
     <button class="btn-print" onclick="printLabels()">⎙ Print Labels</button>
     <button class="btn-print" onclick="logAllToSheet()">📤 Log All to Sheet</button>
-    <button class="btn-print" onclick="importFromSheet()">📥 Import from Sheet</button>
+    <button class="btn-print" onclick="openImportModal()">📥 Import from Sheet</button>
     <a href="https://docs.google.com/spreadsheets/d/1FZsoPeXGp1eXJw1S2X6UoxRypSLm3_tj7RpXWL0yWJo/edit" target="_blank" style="text-decoration:none;">
       <button class="btn-print">📊 View Sheet</button>
     </a>
+    <button class="btn-menu" onclick="toggleMobileMenu()">⋮</button>
   </div>
 </header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <button onclick="closeMobileMenu();printLabels()">⎙ Print Labels</button>
+  <button onclick="closeMobileMenu();logAllToSheet()">📤 Log All to Sheet</button>
+  <button onclick="closeMobileMenu();openImportModal()">📥 Import from Sheet</button>
+  <a href="https://docs.google.com/spreadsheets/d/1FZsoPeXGp1eXJw1S2X6UoxRypSLm3_tj7RpXWL0yWJo/edit" target="_blank" onclick="closeMobileMenu()">📊 View Sheet</a>
+</div>
 
 <div class="layout">
 
@@ -624,20 +711,39 @@ function logToSheet(name, price, date) {
   fetch(url, { mode: "no-cors" }).catch(function() {});
 }
 
-function importFromSheet() {
-  showToast("Importing from sheet...", "ok");
+function openImportModal() {
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("import-from").value = today;
+  document.getElementById("import-to").value = today;
+  document.getElementById("import-modal").style.display = "flex";
+}
+
+function runImport(mode) {
+  const today = new Date().toISOString().split("T")[0];
+  let fromDate = today;
+  let toDate = today;
+  if (mode === "range") {
+    fromDate = document.getElementById("import-from").value;
+    toDate = document.getElementById("import-to").value;
+    if (!fromDate || !toDate) { showToast("Please select a date range.", "err"); return; }
+  }
+  document.getElementById("import-modal").style.display = "none";
+  showToast("Importing...", "ok");
   const callbackName = "sheetImport_" + Date.now();
   const url = `${SHEET_URL}?action=fetch&callback=${callbackName}`;
   window[callbackName] = function(data) {
     delete window[callbackName];
     document.getElementById(callbackName) && document.getElementById(callbackName).remove();
     if (!data || !data.length) { showToast("No data found in sheet.", "err"); return; }
-    // Clear existing labels and rebuild from sheet
+    const filtered = data.filter(function(row) {
+      return row.date >= fromDate && row.date <= toDate;
+    });
+    if (!filtered.length) { showToast("No cards found for that date range.", "err"); return; }
     labels = [];
     totalSpent = 0;
     document.getElementById("labels-grid").innerHTML = "";
     document.getElementById("empty-state").style.display = "block";
-    data.forEach(function(row, i) {
+    filtered.forEach(function(row, i) {
       const id = Date.now() + i;
       const entry = { id, name: row.name, price: parseFloat(row.price).toFixed(2), date: row.date };
       labels.push(entry);
@@ -646,7 +752,7 @@ function importFromSheet() {
     });
     updateStats();
     saveLabels();
-    showToast(`✓ Imported ${data.length} card${data.length !== 1 ? "s" : ""} from sheet`, "ok");
+    showToast(`✓ Imported ${filtered.length} card${filtered.length !== 1 ? "s" : ""}`, "ok");
   };
   const script = document.createElement("script");
   script.id = callbackName;
@@ -728,9 +834,11 @@ function renderLabel({ id, name, price, date }) {
     <button class="btn-remove no-print" onclick="removeLabel(${id})" title="Remove">✕</button>
     <div class="lc-brand">PRICE<span>TRAX</span></div>
     <div id="qr-container"><div id="qr-${id}"></div></div>
-    <div class="lc-name">${escHtml(name)}</div>
-    <div class="lc-price">$${price}</div>
-    <div class="lc-date">${date}</div>
+    <div class="lc-info">
+      <div class="lc-name">${escHtml(name)}</div>
+      <div class="lc-price">$${price}</div>
+      <div class="lc-date">${date}</div>
+    </div>
   `;
   document.getElementById("labels-grid").appendChild(card);
 
@@ -879,6 +987,18 @@ function getQRDataUrl(id) {
   if (img) return img.src;
   return "";
 }
+
+function toggleMobileMenu() {
+  document.getElementById("mobile-menu").classList.toggle("open");
+}
+function closeMobileMenu() {
+  document.getElementById("mobile-menu").classList.remove("open");
+}
+document.addEventListener("click", function(e) {
+  if (!e.target.closest(".btn-menu") && !e.target.closest(".mobile-menu")) {
+    closeMobileMenu();
+  }
+});
 
 document.getElementById("cardName").focus();
 </script>
