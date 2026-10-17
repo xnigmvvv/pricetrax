@@ -711,15 +711,23 @@ function logToSheet(name, price, date) {
   fetch(url, { mode: "no-cors" }).catch(function() {});
 }
 
+function localDateStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 function openImportModal() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = localDateStr();
   document.getElementById("import-from").value = today;
   document.getElementById("import-to").value = today;
   document.getElementById("import-modal").style.display = "flex";
 }
 
 function runImport(mode) {
-  const today = new Date().toISOString().split("T")[0];
+  const today = localDateStr();
   let fromDate = today;
   let toDate = today;
   if (mode === "range") {
@@ -791,7 +799,7 @@ function addLabel() {
   if (!name) { showToast("Please enter a card name.", "err"); nameEl.focus(); return; }
   if (isNaN(price) || price < 0) { showToast("Please enter a valid price.", "err"); priceEl.focus(); return; }
 
-  const date = new Date().toISOString().split("T")[0];
+  const date = localDateStr();
 
   for (let i = 0; i < qty; i++) {
     const id = Date.now() + i;
@@ -815,7 +823,7 @@ function addLabel() {
 function renderLabel({ id, name, price, date }) {
   document.getElementById("empty-state").style.display = "none";
 
-  const t = new Date().toISOString().split("T")[0];
+  const t = localDateStr();
   // Simple encode — XOR each char with PIN key so price isn't visible in URL
   function encodePrice(price) {
     var key = "2323";
