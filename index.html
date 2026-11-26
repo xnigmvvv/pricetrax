@@ -732,7 +732,7 @@
 </div>
 
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyYjmBcOhDHnH9dNxTdWIpeC9I1H5M2YlbHrYr4I3hFiae_6OPYZWqTJh-0YKrIVDbKow/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwQygBHc_TmGOYtfyEe80mVAA_tjceeNB5d_WctWH_SB9cron14fRzzJl8rp1n7yXSScg/exec";
 
 let labels = [];
 let totalSpent = 0;
@@ -745,12 +745,13 @@ function showToast(msg, type) {
   t._timer = setTimeout(() => { t.className = "toast"; }, 3000);
 }
 
-let soldModalId = null, soldModalName = null, soldModalDate = null;
+let soldModalId = null, soldModalName = null, soldModalDate = null, soldModalUid = null;
 
-function openSoldModal(id, name, date) {
+function openSoldModal(id, name, date, uid) {
   soldModalId = id;
   soldModalName = name;
   soldModalDate = date;
+  soldModalUid = uid || "";
   document.getElementById("sold-modal-name").textContent = name;
   document.getElementById("sold-price-input").value = "";
   document.getElementById("sold-modal").style.display = "flex";
@@ -766,24 +767,24 @@ function confirmSold() {
   if (btn) {
     btn.textContent = "SOLD $" + salePrice.toFixed(2);
     btn.classList.add("is-sold");
-    btn.onclick = function(){ markUnsold(soldModalId, soldModalName, soldModalDate); };
+    btn.onclick = function(){ markUnsold(soldModalId, soldModalName, soldModalDate, soldModalUid); };
     btn.title = "Click to mark unsold";
   }
-  const url = `${SHEET_URL}?action=sold&n=${encodeURIComponent(soldModalName)}&t=${soldModalDate}&s=${encodeURIComponent(salePrice.toFixed(2))}`;
+  const url = `${SHEET_URL}?action=sold&n=${encodeURIComponent(soldModalName)}&t=${soldModalDate}&s=${encodeURIComponent(salePrice.toFixed(2))}&uid=${encodeURIComponent(soldModalUid)}`;
   fetch(url, { mode: "no-cors" }).catch(function(){});
   showToast(`✓ Marked sold for $${salePrice.toFixed(2)}`, "ok");
 }
 
-function markUnsold(id, name, date) {
+function markUnsold(id, name, date, uid) {
   if (!confirm("Mark as unsold and clear the sale price?")) return;
   const btn = document.getElementById("sold-btn-" + id);
   if (btn) {
     btn.textContent = "MARK SOLD";
     btn.classList.remove("is-sold");
-    btn.onclick = function(){ openSoldModal(id, name, date); };
+    btn.onclick = function(){ openSoldModal(id, name, date, uid); };
     btn.title = "";
   }
-  const url = `${SHEET_URL}?action=sold&n=${encodeURIComponent(name)}&t=${date}&s=`;
+  const url = `${SHEET_URL}?action=sold&n=${encodeURIComponent(name)}&t=${date}&s=&uid=${encodeURIComponent(uid || "")}`;
   fetch(url, { mode: "no-cors" }).catch(function(){});
   showToast("Marked as unsold.", "ok");
 }
@@ -841,7 +842,7 @@ function runImport(mode) {
     filtered.forEach(function(row, i) {
       const id = Date.now() + i;
       const rowDate = (row.date || "").substring(0, 10);
-      const entry = { id, name: row.name, price: parseFloat(row.price).toFixed(2), date: rowDate };
+      const entry = { id, name: row.name, price: parseFloat(row.price).toFixed(2), date: rowDate, uid: row.uid || "" };
       labels.push(entry);
       renderLabel(entry);
       totalSpent += parseFloat(row.price);
@@ -868,7 +869,7 @@ function logAllToSheet() {
   let count = 0;
   labels.forEach(function(l, i) {
     setTimeout(function() {
-      logToSheet(l.name, l.price, l.date);
+      logToSheet(l.name, l.price, l.date, l.uid);
       count++;
       if (count === labels.length) showToast(`✓ Logged ${count} card${count !== 1 ? "s" : ""} to sheet`, "ok");
     }, i * 300);
@@ -935,7 +936,7 @@ function renderLabel({ id, name, price, date }) {
       <div class="lc-name">${escHtml(name)}</div>
       <div class="lc-price">$${price}</div>
       <div class="lc-date">${date}</div>
-      <button class="btn-sold no-print" id="sold-btn-${id}" onclick="openSoldModal(${id}, '${escHtml(name).replace(/'/g,"\\'")}', '${date}')">MARK SOLD</button>
+      <button class="btn-sold no-print" id="sold-btn-${id}" onclick="openSoldModal(${id}, '${escHtml(name).replace(/'/g,"\\'")}', '${date}', '${uid||""}')">MARK SOLD</button>
     </div>
   `;
   document.getElementById("labels-grid").appendChild(card);
