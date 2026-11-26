@@ -910,7 +910,7 @@ function addLabel() {
   showToast(msg, "ok");
 }
 
-function renderLabel({ id, name, price, date }) {
+function renderLabel({ id, name, price, date, uid }) {
   document.getElementById("empty-state").style.display = "none";
 
   const t = localDateStr();
