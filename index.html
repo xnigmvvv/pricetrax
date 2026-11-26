@@ -923,7 +923,7 @@ function renderLabel({ id, name, price, date }) {
     }
     return btoa(result);
   }
-  const url = `https://pricetrax.badgerbreaks.com/scan.html?n=${encodeURIComponent(name)}&p=${encodePrice(price)}&t=${t}`;
+  const url = `https://pricetrax.badgerbreaks.com/scan.html?n=${encodeURIComponent(name)}&p=${encodePrice(price)}&t=${t}&uid=${encodeURIComponent(uid||"")}`;
 
   const card = document.createElement("div");
   card.className = "label-card";
